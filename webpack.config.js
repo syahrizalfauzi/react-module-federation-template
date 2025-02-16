@@ -8,15 +8,17 @@ const ESLintWebpackPlugin = require('eslint-webpack-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const PACKAGE = require('./package.json');
 
-// const remotes = {
+// const REMOTES = {
 //     module_other: process.env.MODULE_OTHER_URL
 // };
+
+const SINGLETONS = ['react', 'react-dom'];
 
 const federationConfig = {
     name: PACKAGE.name,
     filename: 'remoteEntry.js',
     // remotes: Object.fromEntries(
-    //     Object.entries(remotes).map(([name, url]) => [name, `${name}@${url}/remoteEntry.js`])
+    //     Object.entries(REMOTES).map(([name, url]) => [name, `${name}@${url}/remoteEntry.js`])
     // ),
     remotes: {},
     exposes: {
@@ -25,14 +27,12 @@ const federationConfig = {
     },
     shared: {
         ...PACKAGE.dependencies,
-        react: {
-            singleton: true,
-            requiredVersion: PACKAGE.dependencies.react
-        },
-        'react-dom': {
-            singleton: true,
-            requiredVersion: PACKAGE.dependencies['react-dom']
-        }
+        ...Object.fromEntries(
+            SINGLETONS.map(name => [
+                name,
+                { singleton: true, requiredVersion: PACKAGE.dependencies[name] }
+            ])
+        )
     }
 };
 
@@ -82,7 +82,7 @@ const config = {
         new FriendlyErrorsWebpackPlugin({
             compilationSuccessInfo: {
                 messages: [
-                    `Your application is running here: http://localhost:${process.env.PORT ?? 3000}`
+                    `${PACKAGE.name} is running here: http://localhost:${process.env.PORT ?? 3000}`
                 ]
             }
         })
