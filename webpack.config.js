@@ -6,6 +6,7 @@ const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPl
 const { FederatedTypesPlugin } = require('@module-federation/typescript');
 const ESLintWebpackPlugin = require('eslint-webpack-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
+const { DefinePlugin } = require('webpack');
 const PACKAGE = require('./package.json');
 
 // const REMOTES = {
@@ -35,6 +36,12 @@ const federationConfig = {
         )
     }
 };
+
+const envKeys = Object.keys(process.env).reduce((prev, next) => {
+    // eslint-disable-next-line no-param-reassign
+    prev[`process.env.${next}`] = JSON.stringify(process.env[next]);
+    return prev;
+}, {});
 
 const config = {
     mode: process.env.NODE_ENV ?? 'development',
@@ -85,7 +92,8 @@ const config = {
                     `${PACKAGE.name} is running here: http://localhost:${process.env.PORT ?? 3000}`
                 ]
             }
-        })
+        }),
+        new DefinePlugin(envKeys)
     ]
 };
 
